@@ -17,6 +17,9 @@ namespace cgroups
             Cgroup(const std::string name);
             ~Cgroup();
 
+            template <typename T>
+            void set_value(const std::string file, const T value) const;
+
         private:
             const std::string name_;
             std::string path_;
@@ -29,6 +32,7 @@ namespace cgroups
     {
         public:
             CgroupException(const std::string msg, const std::string cgroup);
+            CgroupException(const std::string msg, const std::string cgroup, const std::string file);
 
             const char* what();
 
@@ -38,3 +42,5 @@ namespace cgroups
 
     cgroup_list create_cgroups(void);
 }
+
+#include <cgroups/cgroups.hxx>

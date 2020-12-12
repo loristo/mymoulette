@@ -12,7 +12,7 @@ namespace cgroups
 {
     static void memory(const Cgroup& Cgroup)
     {
-        (void) Cgroup;
+        Cgroup.set_value("memory.max_usage_in_bytes", 1024);
     }
 
     cgroup_list create_cgroups(void)
@@ -41,7 +41,7 @@ namespace cgroups
         path_ = ss.str();
 
         if (mkdir(path_.c_str(), 700) == -1)
-            throw CgroupException("creation", name_);
+            throw CgroupException("creation failed", name_);
     }
 
     Cgroup::~Cgroup()
@@ -49,7 +49,7 @@ namespace cgroups
         try
         {
             if (rmdir(path_.c_str()) == -1)
-                throw CgroupException("deletion", name_);
+                throw CgroupException("deletion failed", name_);
         }
         catch (cgroups::CgroupException& e)
         {
@@ -61,7 +61,15 @@ namespace cgroups
     CgroupException::CgroupException(const std::string msg, const std::string cgroup)
     {
         std::ostringstream ss;
-        ss << "cgroup " << cgroup << " " << msg << " failed";
+        ss << "cgroup `" << cgroup << "': " << msg;
+        msg_ = ss.str();
+    }
+
+    CgroupException::CgroupException(const std::string msg, const std::string cgroup,
+            const std::string file)
+    {
+        std::ostringstream ss;
+        ss << "cgroup `" << cgroup << "': " << msg << " for file " << file;
         msg_ = ss.str();
     }
 
@@ -69,6 +77,5 @@ namespace cgroups
     {
         return msg_.c_str();
     }
-
 
 }
