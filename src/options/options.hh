@@ -9,13 +9,13 @@ namespace options
         ~Options() = default;
 
     private:
-        bool is_docker_img = false;
-        char *student_dir = NULL;
+        bool is_docker_img_ = false;
+        char *student_dir_ = NULL;
         union
         {
             char *docker_img;
             char *rootfs;
-        } path;
-        char **moulette_prog;
+        } path_;
+        char **moulette_prog_;
     };
 }

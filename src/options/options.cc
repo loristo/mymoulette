@@ -43,11 +43,11 @@ namespace options
         while ((opt = getopt(argc, argv, "v:I:h")) != -1) {
             switch (opt) {
             case 'v':
-                this->student_dir = optarg;
+                this->student_dir_ = optarg;
                 break;
             case 'I':
-                this->is_docker_img = true;
-                this->path.docker_img = optarg;
+                this->is_docker_img_ = true;
+                this->path_.docker_img = optarg;
                 break;
             case 'h':
                 help();
@@ -58,18 +58,18 @@ namespace options
             }
         }
 
-        if (!this->is_docker_img)
+        if (!this->is_docker_img_)
         {
             if (optind == argc)
                 help(ERR_BADOPTION, "missing rootfs_path and moulette_prog");
-            this->path.rootfs = argv[optind];
+            this->path_.rootfs = argv[optind];
             optind++;
         }
 
         if (optind == argc)
             help(ERR_BADOPTION, "missing moulette_prog");
 
-        this->moulette_prog = argv + optind;
+        this->moulette_prog_ = argv + optind;
     }
 
 }
