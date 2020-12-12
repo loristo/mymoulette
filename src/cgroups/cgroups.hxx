@@ -3,6 +3,7 @@
 #include <cgroups/cgroups.hh>
 
 #include <fstream>
+#include <sstream>
 
 namespace cgroups
 {
@@ -10,7 +11,7 @@ namespace cgroups
     template <typename T>
     void Cgroup::set_value(const std::string file, const T value) const
     {
-        std::stringstream ss;
+        std::ostringstream ss;
         ss << this->path_ << "/" << file;
         std::ofstream fstream(ss.str());
         if (!fstream)

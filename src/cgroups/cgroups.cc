@@ -12,7 +12,7 @@ namespace cgroups
 {
     static void memory(const Cgroup& Cgroup)
     {
-        Cgroup.set_value("memory.max_usage_in_bytes", 1024);
+        Cgroup.set_value("memory.max_usage_in_bytes", 1024 * 1024 * 1024);
     }
 
     cgroup_list create_cgroups(void)
