@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
 
     try
     {
-        cgroups::create_cgroups();
+        auto cgroups = cgroups::create_cgroups();
     }
     catch (cgroups::CgroupException& e)
     {

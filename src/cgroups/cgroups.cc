@@ -15,17 +15,29 @@ namespace cgroups
         Cgroup.set_value("memory.max_usage_in_bytes", 1024 * 1024 * 1024);
     }
 
-    cgroup_list create_cgroups(void)
+    static void cpuset(const Cgroup& Cgroup)
     {
-        auto cgroups = std::make_unique<std::vector<Cgroup>>();
+        Cgroup.set_value("cpuset.cpus", 0);
+    }
+
+    static void pids(const Cgroup& Cgroup)
+    {
+        Cgroup.set_value("pids.max", "100");
+    }
+
+    cgroups create_cgroups(void)
+    {
+        auto cgroups = std::make_unique<cgroup_list>();
 
         const std::vector<cgroup_gen> schedule = {
-            std::make_pair("memory", memory)
+            std::make_pair("memory", memory),
+            std::make_pair("cpuset", cpuset),
+            std::make_pair("pids", pids)
         };
 
-        for (auto& todo : schedule)
+        for (const auto& todo : schedule)
         {
-            auto& cgroup = cgroups->emplace_back(todo.first);
+            const auto& cgroup = cgroups->emplace_back(todo.first);
             todo.second(cgroup);
         }
 
@@ -51,7 +63,7 @@ namespace cgroups
             if (rmdir(path_.c_str()) == -1)
                 throw CgroupException("deletion failed", name_);
         }
-        catch (cgroups::CgroupException& e)
+        catch (CgroupException& e)
         {
             warn(e.what());
         }

@@ -5,7 +5,7 @@
 #include <memory>
 #include <string>
 #include <utility>
-#include <vector>
+#include <list>
 
 namespace cgroups
 {
@@ -15,6 +15,7 @@ namespace cgroups
     {
         public:
             Cgroup(const std::string name);
+            Cgroup(const Cgroup& cgroup) = delete;
             ~Cgroup();
 
             template <typename T>
@@ -25,7 +26,8 @@ namespace cgroups
             std::string path_;
     };
 
-    typedef std::unique_ptr<std::vector<Cgroup>> cgroup_list;
+    typedef std::list<Cgroup> cgroup_list;
+    typedef std::unique_ptr<cgroup_list> cgroups;
     typedef std::pair<const char *, std::function<void(const Cgroup&)>> cgroup_gen;
 
     class CgroupException : public std::exception
@@ -40,7 +42,7 @@ namespace cgroups
             std::string msg_;
     };
 
-    cgroup_list create_cgroups(void);
+    cgroups create_cgroups(void);
 }
 
 #include <cgroups/cgroups.hxx>
