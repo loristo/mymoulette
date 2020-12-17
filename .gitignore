@@ -1,2 +1,5 @@
 *.o
 mymoulette
+
+rootfs/
+.img/
