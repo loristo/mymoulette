@@ -36,13 +36,13 @@ namespace cgroups
             CgroupException(const std::string msg, const std::string cgroup);
             CgroupException(const std::string msg, const std::string cgroup, const std::string file);
 
-            const char* what();
+            const char *what();
 
         private:
             std::string msg_;
     };
 
-    cgroups create_cgroups(void);
+    cgroups create_cgroups();
 }
 
 #include <cgroups/cgroups.hxx>

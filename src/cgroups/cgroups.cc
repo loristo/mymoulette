@@ -25,7 +25,7 @@ namespace cgroups
         Cgroup.set_value("pids.max", "100");
     }
 
-    cgroups create_cgroups(void)
+    cgroups create_cgroups()
     {
         auto cgroups = std::make_unique<cgroup_list>();
 
@@ -52,7 +52,7 @@ namespace cgroups
         ss << "/sys/fs/cgroup/" << name << "/" << dirname;
         path_ = ss.str();
 
-        if (mkdir(path_.c_str(), 700) == -1)
+        if (mkdir(path_.c_str(), 0333) == -1)
             throw CgroupException("creation failed", name_);
     }
 
