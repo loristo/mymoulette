@@ -1,5 +1,6 @@
 *.o
 mymoulette
 
+build/
 rootfs/
 .img/
