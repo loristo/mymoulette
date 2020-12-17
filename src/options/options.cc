@@ -9,7 +9,7 @@
 
 namespace options
 {
-    static void help(void)
+    static void help()
     {
         std::cout
             << "MyMoulette, the students' nightmare, now highly secured\n"
