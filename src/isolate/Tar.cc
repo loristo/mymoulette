@@ -48,29 +48,35 @@ namespace isolate
     }
 
     Tar::Tar()
-        : a_(archive_read_new()),
-          ext_(archive_write_disk_new())
+    {}
+
+    Tar::~Tar()
     {
+        if (a_)
+        {
+            archive_read_close(a_);
+            archive_read_free(a_);
+        }
+        if (ext_)
+        {
+            archive_write_close(ext_);
+            archive_write_free(ext_);
+        }
+    }
+
+    void Tar::untar(const std::string& data)
+    {
+        struct archive_entry *entry;
+        a_ = archive_read_new();
+        ext_ = archive_write_disk_new();
+        int r;
+
         if (a_ == NULL || ext_ == NULL)
             throw TarException("could not create archive structure");
 
         archive_write_disk_set_options(ext_, 0);
         archive_read_support_format_tar(a_);
         archive_read_support_filter_gzip(a_);
-    }
-
-    Tar::~Tar()
-    {
-        archive_read_close(a_);
-        archive_read_free(a_);
-        archive_write_close(ext_);
-        archive_write_free(ext_);
-    }
-
-    void Tar::untar(const std::string& data)
-    {
-        struct archive_entry *entry;
-        int r;
 
         if ((r = archive_read_open_memory(a_, data.c_str(), data.size())))
             throw TarException("could not open tar", archive_error_string(a_));
@@ -94,6 +100,13 @@ namespace isolate
                     throw TarException("could not untar", archive_error_string(a_));
             }
         }
+        archive_read_close(a_);
+        archive_read_free(a_);
+        archive_write_close(ext_);
+        archive_write_free(ext_);
+
+        a_ = NULL;
+        ext_ = NULL;
     }
 
 

@@ -15,9 +15,8 @@ namespace isolate
             void untar(const std::string& data);
 
         private:
-            const std::string dest_;
-            struct archive *a_;
-            struct archive *ext_;
+            struct archive *a_ = NULL;
+            struct archive *ext_ = NULL;
     };
 
     class TarException : public std::exception
