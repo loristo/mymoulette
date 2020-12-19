@@ -52,7 +52,7 @@ namespace cgroups
         ss << "/sys/fs/cgroup/" << name << "/" << dirname;
         path_ = ss.str();
 
-        if (mkdir(path_.c_str(), 0333) == -1)
+        if (mkdir(path_.c_str(), 0333) == -1 && errno != EEXIST)
             throw CgroupException("creation failed", name_);
     }
 

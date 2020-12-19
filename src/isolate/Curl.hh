@@ -13,6 +13,8 @@ namespace isolate
             ~Curl();
 
             std::string get(const std::string url);
+            void wget(const std::string& url, const std::string& path);
+            void set_auth_only(const std::string& token);
             void set_auth(const std::string& token);
             void set_auth(const std::string& token, const std::string& mediatype);
 

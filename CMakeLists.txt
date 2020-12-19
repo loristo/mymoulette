@@ -10,6 +10,7 @@ option(BUILD_TEST "Build with the package as well as the tests." OFF)
 
 find_program(REQUIRED go)
 find_library(REQUIRED libcurl)
+find_library(REQUIRED libtar)
 
 include(FetchContent)
 

@@ -4,11 +4,13 @@ set(isolate_src
     IsolatedDocker.cc
     IsolatedException.cc
     IsolatedRootfs.cc
-    Curl.cc)
+    Curl.cc
+    Tar.cc)
 
 add_library(isolate ${isolate_src})
 
 target_link_libraries(isolate
         PRIVATE nlohmann_json
         PRIVATE curl
+        PRIVATE archive
         )

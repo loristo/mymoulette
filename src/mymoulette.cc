@@ -8,6 +8,7 @@
 #include <capabilities/capabilities.hh>
 #include <isolate/isolate.hh>
 #include <isolate/Curl.hh>
+#include <isolate/Tar.hh>
 
 isolate::Isolated get_container(const options::Options& opt)
 {
@@ -43,6 +44,11 @@ int main(int argc, char *argv[])
         return ERR_ISOLATED;
     }
     catch (isolate::CurlException& e)
+    {
+        warnx(e.what());
+        return ERR_CURL;
+    }
+    catch (isolate::TarException& e)
     {
         warnx(e.what());
         return ERR_CURL;

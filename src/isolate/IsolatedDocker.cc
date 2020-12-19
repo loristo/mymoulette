@@ -9,6 +9,7 @@
 
 #include <isolate/isolate.hh>
 #include <isolate/Curl.hh>
+#include <isolate/Tar.hh>
 
 namespace isolate
 {
@@ -41,11 +42,10 @@ namespace isolate
         ss << baseurl << image << "/manifests/" << version;
         auto resp = c.get(ss.str());
         auto j = json::parse(resp);
-        for (auto man : j["manifests"])
+        for (const auto& man : j["manifests"])
         {
             const std::string os = man["platform"]["os"];
             const std::string arch = man["platform"]["architecture"];
-            std::cout << os << " " << arch << '\n';
             if (os.compare(OS) == 0
                     && arch.compare(ARCH) == 0)
                 return man[field];
@@ -63,6 +63,24 @@ namespace isolate
         return get_conf(c, image, version, "mediaType");
     }
 
+    static void get_layers(Curl& c, const std::string& image,
+            const std::string& digest, const std::string& token)
+    {
+        Tar t;
+        std::stringstream ss;
+        ss << baseurl << image << "/manifests/" << digest;
+        auto resp = c.get(ss.str());
+        auto j = json::parse(resp);
+        c.set_auth_only(token);
+        for (const auto& layer : j["layers"])
+        {
+            const std::string layer_digest = layer["digest"];
+            std::stringstream ss;
+            ss << baseurl << image << "/blobs/" << layer_digest;
+            t.untar(c.get(ss.str()));
+        }
+    }
+
     IsolatedDocker::IsolatedDocker(const std::string& docker)
         : Isolated(mkdtemp(dirname))
     {
@@ -74,8 +92,8 @@ namespace isolate
         c.set_auth(token);
         auto digest = get_digest(c, image, version);
         auto mediatype = get_mediatype(c, image, version);
-        std::cout << "digest: " << digest << ", mediatype: " << mediatype << '\n';
         c.set_auth(token, mediatype);
+        get_layers(c, image, digest, token);
     }
 
     IsolatedDocker::~IsolatedDocker()
