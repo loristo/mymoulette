@@ -37,6 +37,12 @@ namespace options
         exit(i);
     }
 
+    static void check_docker(const std::string& docker)
+    {
+        if (docker.find(":") == std::string::npos)
+            errx(ERR_BADOPTION, "malformed docker image");
+    }
+
     Options::Options(int argc, char *argv[])
     {
         int opt;
@@ -46,8 +52,9 @@ namespace options
                 this->student_dir_ = optarg;
                 break;
             case 'I':
-                this->is_docker_img_ = true;
-                this->path_.docker_img = optarg;
+                this->is_docker_ = true;
+                this->path_.docker = optarg;
+                check_docker(this->path_.docker);
                 break;
             case 'h':
                 help();
@@ -58,7 +65,7 @@ namespace options
             }
         }
 
-        if (!this->is_docker_img_)
+        if (!this->is_docker_)
         {
             if (optind == argc)
                 help(ERR_BADOPTION, "missing rootfs_path and moulette_prog");
@@ -72,4 +79,18 @@ namespace options
         this->moulette_prog_ = argv + optind;
     }
 
+    bool Options::is_docker() const
+    {
+        return this->is_docker_;
+    }
+
+    const char *Options::get_docker() const
+    {
+        return this->path_.docker;
+    }
+
+    const char *Options::get_rootfs() const
+    {
+        return this->path_.rootfs;
+    }
 }

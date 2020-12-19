@@ -4,7 +4,7 @@
 
 namespace isolate
 {
-    IsolatedException::IsolatedException(const std::string msg)
+    IsolatedException::IsolatedException(const std::string& msg)
         : msg_(msg)
     {}
 
