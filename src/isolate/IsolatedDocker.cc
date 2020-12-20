@@ -1,4 +1,7 @@
 #include <err.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #include <nlohmann/json.hpp>
 
@@ -14,7 +17,7 @@
 namespace isolate
 {
     using json = nlohmann::json;
-    static char dirname[] = "/tmp/mymoulette.XXXXXX";
+    static char dirname[] = ".mymoulette.XXXXXX";
     static char baseurl[] = "https://registry-1.docker.io/v2/";
 
     static void split_image(const std::string& docker, std::string& image, std::string& version)
@@ -63,10 +66,10 @@ namespace isolate
         return get_conf(c, image, version, "mediaType");
     }
 
-    static void get_layers(Curl& c, const std::string& image,
+    static void get_layers(Curl& c, const std::string& folder, const std::string& image,
             const std::string& digest, const std::string& token)
     {
-        Tar t;
+        Tar t(folder);
         std::stringstream ss;
         ss << baseurl << image << "/manifests/" << digest;
         auto resp = c.get(ss.str());
@@ -84,6 +87,10 @@ namespace isolate
     IsolatedDocker::IsolatedDocker(const std::string& docker)
         : Isolated(mkdtemp(dirname))
     {
+        Dir save(".");
+        if (chdir(folder_.c_str()) == -1)
+            throw IsolatedException("could not chdir");
+
         std::string image, version;
         split_image(docker, image, version);
         Curl c;
@@ -93,18 +100,33 @@ namespace isolate
         auto digest = get_digest(c, image, version);
         auto mediatype = get_mediatype(c, image, version);
         c.set_auth(token, mediatype);
-        get_layers(c, image, digest, token);
+        get_layers(c, folder_, image, digest, token);
+
+        if (fchdir(save.fd_) == -1)
+            throw IsolatedException("could not chdir");
     }
 
     IsolatedDocker::~IsolatedDocker()
     {
         try
         {
-            std::filesystem::remove_all(dirname);
+            // std::filesystem::remove_all(dirname);
         }
         catch (std::exception& e)
         {
             warnx(e.what());
         }
+    }
+
+    Dir::Dir(const std::string& dir)
+    {
+        fd_ = open(dir.c_str(), O_RDONLY);
+        if (fd_ == -1)
+            throw IsolatedException("could not open .");
+    }
+
+    Dir::~Dir()
+    {
+        close(fd_);
     }
 }

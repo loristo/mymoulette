@@ -11,6 +11,7 @@ namespace options
         bool is_docker() const;
         const char *get_docker() const;
         const char *get_rootfs() const;
+        char **get_moulette_prog();
 
     private:
         bool is_docker_ = false;

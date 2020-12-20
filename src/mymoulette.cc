@@ -1,6 +1,7 @@
 #include <err.h>
 
 #include <iostream>
+#include <memory>
 
 #include <mymoulette.hh>
 #include <options/options.hh>
@@ -10,12 +11,12 @@
 #include <isolate/Curl.hh>
 #include <isolate/Tar.hh>
 
-isolate::Isolated get_container(const options::Options& opt)
+std::shared_ptr<isolate::Isolated> get_container(const options::Options& opt)
 {
     if (opt.is_docker())
-        return isolate::IsolatedDocker(opt.get_docker());
+        return std::make_shared<isolate::IsolatedDocker>(opt.get_docker());
     else
-        return isolate::IsolatedRootfs(opt.get_rootfs());
+        return std::make_shared<isolate::IsolatedRootfs>(opt.get_rootfs());
 }
 
 int main(int argc, char *argv[])
@@ -24,9 +25,10 @@ int main(int argc, char *argv[])
 
     try
     {
-        auto cgroups = cgroups::create_cgroups();
-        capabilities::lower_capabilites();
-        isolate::Isolated container = get_container(opt);
+        // auto cgroups = cgroups::create_cgroups();
+        // capabilities::lower_capabilites();
+        auto container = get_container(opt);
+        container->run(opt.get_moulette_prog());
     }
     catch (cgroups::CgroupException& e)
     {

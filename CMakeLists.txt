@@ -50,10 +50,10 @@ target_include_directories(mymoulette
     INTERFACE ${CMAKE_ROOT}/src/
 )
 
-    #add_custom_command(TARGET mymoulette POST_BUILD
-    #COMMAND setcap cap_dac_override=ep ./mymoulette
-    #COMMENT "Setting capabilities"
-    #)
+#add_custom_command(TARGET mymoulette POST_BUILD
+#    COMMAND setcap cap_dac_override=ep ./mymoulette
+#    COMMENT "Setting capabilities"
+#    )
 
 if (BUILD_TEST)
     add_subdirectory(tests)

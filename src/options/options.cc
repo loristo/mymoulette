@@ -93,4 +93,9 @@ namespace options
     {
         return this->path_.rootfs;
     }
+
+    char **Options::get_moulette_prog()
+    {
+        return this->moulette_prog_;
+    }
 }

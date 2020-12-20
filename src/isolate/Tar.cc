@@ -19,8 +19,7 @@
 
 namespace isolate
 {
-    static int
-    copy_data(struct archive *ar, struct archive *aw)
+    static int copy_data(struct archive *ar, struct archive *aw)
     {
         int r = ARCHIVE_OK;
         const void *buff;
@@ -47,7 +46,8 @@ namespace isolate
         return ARCHIVE_OK;
     }
 
-    Tar::Tar()
+    Tar::Tar(const std::string& dest)
+        : dest_(dest)
     {}
 
     Tar::~Tar()
@@ -83,8 +83,8 @@ namespace isolate
         for (r = archive_read_next_header(a_, &entry);
                 r != ARCHIVE_EOF; r = archive_read_next_header(a_, &entry))
         {
-            if (r != ARCHIVE_OK)
-                throw TarException("could not untar tar", archive_error_string(a_));
+            if (r != ARCHIVE_OK && r != ARCHIVE_WARN)
+                throw TarException("could not untar read header", archive_error_string(a_));
 
             r = archive_write_header(ext_, entry);
             if (r != ARCHIVE_OK)
@@ -112,12 +112,17 @@ namespace isolate
 
     TarException::TarException(const std::string& msg)
         : msg_(msg)
-    {}
+    {
+        std::locale::global(std::locale(""));
+    }
 
-    TarException::TarException(const std::string& msg, const std::string& tar_error)
+    TarException::TarException(const std::string& msg, const char *tar_error)
     {
         std::stringstream ss;
-        ss << msg << ": " << tar_error;
+        if (tar_error != NULL)
+            ss << msg << ": " << tar_error;
+        else
+            ss << msg;
         msg_ = ss.str();
     }
 

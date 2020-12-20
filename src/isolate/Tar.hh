@@ -10,11 +10,12 @@ namespace isolate
     class Tar
     {
         public:
-            Tar();
+            Tar(const std::string& dest);
             ~Tar();
             void untar(const std::string& data);
 
         private:
+            const std::string dest_;
             struct archive *a_ = NULL;
             struct archive *ext_ = NULL;
     };
@@ -23,7 +24,7 @@ namespace isolate
     {
         public:
             TarException(const std::string& msg);
-            TarException(const std::string& msg, const std::string& tar_error);
+            TarException(const std::string& msg, const char *tar_error);
 
             const char* what();
 
