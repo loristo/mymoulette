@@ -98,4 +98,11 @@ namespace options
     {
         return this->moulette_prog_;
     }
+
+    std::optional<std::string> Options::get_student_dir() const
+    {
+        if (this->student_dir_)
+            return this->student_dir_;
+        return std::nullopt;
+    }
 }

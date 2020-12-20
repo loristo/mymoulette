@@ -2,6 +2,7 @@
 
 #include <string>
 #include <exception>
+#include <optional>
 
 namespace isolate
 {
@@ -10,15 +11,19 @@ namespace isolate
         public:
             ~Isolated();
 
-            void run(char *argv[]);
+            int run(char *argv[]);
             int child(char *argv[]);
-            void pivot_root();
-            void set_hostname();
 
         protected:
-            Isolated(const std::string& folder);
+            Isolated(const std::string& folder, const std::optional<std::string> student);
             Isolated(std::nullptr_t null);
             const std::string folder_;
+            const std::optional<std::string> student_;
+
+        private:
+            void pivot_root();
+            void set_hostname();
+            void mount_student();
     };
 
     struct exec_data
@@ -32,13 +37,13 @@ namespace isolate
     class IsolatedRootfs : public Isolated
     {
         public:
-            IsolatedRootfs(const std::string& dir);
+            IsolatedRootfs(const std::string& folder, const std::optional<std::string> student);
     };
 
     class IsolatedDocker : public Isolated
     {
         public:
-            IsolatedDocker(const std::string& docker);
+            IsolatedDocker(const std::string& folder, const std::optional<std::string> student);
             ~IsolatedDocker();
     };
 

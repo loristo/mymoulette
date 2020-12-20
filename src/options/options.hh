@@ -1,5 +1,8 @@
 #pragma once
 
+#include <optional>
+#include <string>
+
 namespace options
 {
     class Options
@@ -11,6 +14,7 @@ namespace options
         bool is_docker() const;
         const char *get_docker() const;
         const char *get_rootfs() const;
+        std::optional<std::string> get_student_dir() const;
         char **get_moulette_prog();
 
     private:

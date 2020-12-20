@@ -84,8 +84,9 @@ namespace isolate
         }
     }
 
-    IsolatedDocker::IsolatedDocker(const std::string& docker)
-        : Isolated(mkdtemp(dirname))
+    IsolatedDocker::IsolatedDocker(const std::string& docker,
+            const std::optional<std::string> student)
+        : Isolated(mkdtemp(dirname), student)
     {
         Dir save(".");
         if (chdir(folder_.c_str()) == -1)
@@ -110,7 +111,7 @@ namespace isolate
     {
         try
         {
-            // std::filesystem::remove_all(dirname);
+            std::filesystem::remove_all(dirname);
         }
         catch (std::exception& e)
         {

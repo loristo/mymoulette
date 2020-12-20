@@ -18,8 +18,11 @@
 #include <random>
 #include <sstream>
 
+#include <mymoulette.hh>
 #include <isolate/isolate.hh>
 #include <cgroups/cgroups.hh>
+#include <capabilities/capabilities.hh>
+#include <syscalls/syscalls.hh>
 
 #define STACK_SIZE (1024 * 1024)  // Stack size for cloned child
 
@@ -39,33 +42,50 @@ namespace isolate
             continue;
         try
         {
+            if (mount(NULL, "/", NULL, MS_REC | MS_PRIVATE, NULL) == 1)
+                throw IsolatedException("could not mount private");
+
+            if (this->student_ != std::nullopt)
+                this->mount_student();
+
             this->pivot_root();
             this->set_hostname();
+
+            capabilities::lower_capabilites();
+            syscalls::filter_syscalls();
         }
         catch (IsolatedException& e)
         {
             warn(e.what());
-            return -1;
+            return ERR_ISOLATED;
         }
         catch (cgroups::CgroupException& e)
         {
             warn(e.what());
-            return -1;
+            return ERR_CGROUPS;
+        }
+        catch (capabilities::CapabilitiesException& e)
+        {
+            warn(e.what());
+            return ERR_CAPABILITIES;
+        }
+        catch (syscalls::SyscallsException& e)
+        {
+            warn(e.what());
+            return ERR_SYSCALLS;
         }
         catch (std::exception& e)
         {
             warn(e.what());
             return -1;
         }
-        execvp(argv[0], argv);
-        return 0;
+        if (execvp(argv[0], argv) == -1)
+            warn("could not execvp");
+        return -1;
     }
 
     void Isolated::pivot_root()
     {
-        if (mount(NULL, "/", NULL, MS_REC | MS_PRIVATE, NULL) == 1)
-            throw IsolatedException("could not mount private");
-
         if (mount(folder_.c_str(), folder_.c_str(), NULL, MS_BIND, NULL) == -1)
             throw IsolatedException("could not mount bind");
 
@@ -94,9 +114,6 @@ namespace isolate
             throw IsolatedException("could not mkdir dev");
         if (mount("dev", "/dev", NULL, MS_BIND, NULL) == -1)
             throw IsolatedException("could not mount bind dev");
-
-        if (mkdir("home", 0744) == -1 && errno != EEXIST)
-            throw IsolatedException("could not mkdir home");
 
         if (syscall(SYS_pivot_root, ".", "oldroot") == -1)
             throw IsolatedException("could not pivot_root");
@@ -127,10 +144,24 @@ namespace isolate
 
     }
 
-    void Isolated::run(char *argv[])
+    void Isolated::mount_student()
+    {
+        std::stringstream ss;
+        ss << folder_ << "/home";
+        if (mkdir(ss.str().c_str(), 0744) == -1 && errno != EEXIST)
+            throw IsolatedException("could not mkdir home");
+        ss << "/student";
+        if (mkdir(ss.str().c_str(), 0744) == -1 && errno != EEXIST)
+            throw IsolatedException("could not mkdir home/student");
+        if (mount(student_->c_str(), ss.str().c_str(), NULL, MS_BIND, NULL) == -1)
+            throw IsolatedException("could not mount bind student dir");
+    }
+
+    int Isolated::run(char *argv[])
     {
         char *stack;
         char *stackTop;
+        int res = 0;
 
         struct exec_data exec_data(argv, this);
 
@@ -140,7 +171,6 @@ namespace isolate
             throw IsolatedException("could not mmap");
 
         stackTop = stack + STACK_SIZE;
-
 
         int clone_flags =
               CLONE_NEWNS
@@ -191,17 +221,18 @@ namespace isolate
                 throw IsolatedException("could not write gid_map");
         }
 
-        std::cout << "pid: " << pid << '\n';
-        if (waitpid(pid, NULL, 0) == -1)
+        if (waitpid(pid, &res, 0) == -1)
         {
             munmap(stack, STACK_SIZE);
             throw IsolatedException("could not waitpid");
         }
         munmap(stack, STACK_SIZE);
+        return res;
     }
 
-    Isolated::Isolated(const std::string& folder)
+    Isolated::Isolated(const std::string& folder, const std::optional<std::string> student)
         : folder_(folder)
+        , student_(student)
     {}
 
     exec_data::exec_data(char **argv, Isolated *container)

@@ -7,7 +7,7 @@
 namespace capabilities
 {
     void lower_capabilites(void);
-    inline void print_capabilities();
+    void print_capabilities();
 
     class CapabilitiesException : public std::exception
     {

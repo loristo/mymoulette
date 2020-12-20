@@ -14,31 +14,32 @@
 std::shared_ptr<isolate::Isolated> get_container(const options::Options& opt)
 {
     if (opt.is_docker())
-        return std::make_shared<isolate::IsolatedDocker>(opt.get_docker());
+        return std::make_shared<isolate::IsolatedDocker>(
+                    opt.get_docker(),
+                    opt.get_student_dir()
+                );
     else
-        return std::make_shared<isolate::IsolatedRootfs>(opt.get_rootfs());
+        return std::make_shared<isolate::IsolatedRootfs>(
+                    opt.get_rootfs(),
+                    opt.get_student_dir()
+                );
 }
 
 int main(int argc, char *argv[])
 {
+    int res = 0;
     options::Options opt(argc, argv);
 
     try
     {
-        // auto cgroups = cgroups::create_cgroups();
-        // capabilities::lower_capabilites();
+        auto cgroups = cgroups::create_cgroups();
         auto container = get_container(opt);
-        container->run(opt.get_moulette_prog());
+        res = container->run(opt.get_moulette_prog());
     }
     catch (cgroups::CgroupException& e)
     {
         warn(e.what());
         return ERR_CGROUPS;
-    }
-    catch (capabilities::CapabilitiesException& e)
-    {
-        warn(e.what());
-        return ERR_CAPABILITIES;
     }
     catch (isolate::IsolatedException& e)
     {
@@ -61,5 +62,5 @@ int main(int argc, char *argv[])
         return ERR_UNKNOWN;
     }
 
-    return 0;
+    return res;
 }

@@ -4,7 +4,8 @@
 
 namespace isolate
 {
-    IsolatedRootfs::IsolatedRootfs(const std::string& dir)
-        : Isolated(dir)
+    IsolatedRootfs::IsolatedRootfs(const std::string& folder,
+            const std::optional<std::string> student)
+        : Isolated(folder, student)
     {}
 }

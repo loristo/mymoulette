@@ -51,7 +51,7 @@
 
 namespace capabilities
 {
-    inline void print_capabilities()
+    void print_capabilities()
     {
         struct __user_cap_header_struct _hdrp;
         struct __user_cap_data_struct _datap[_LINUX_CAPABILITY_U32S_2];
