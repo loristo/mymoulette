@@ -9,6 +9,6 @@ To do so, this program uses cgroups, namespaces and capabilities to restrain the
 
 The following command will build the mymoulette binary and print the help message:
 ```sh
-sudo make
+mkdir build && cd build && cmake .. && sudo make
 ./mymoulette -h
 ```
