@@ -45,6 +45,9 @@ namespace isolate
             if (mount(NULL, "/", NULL, MS_REC | MS_PRIVATE, NULL) == 1)
                 throw IsolatedException("could not mount private");
 
+            if (mount(folder_.c_str(), folder_.c_str(), NULL, MS_BIND, NULL) == -1)
+                throw IsolatedException("could not mount bind");
+
             if (this->student_ != std::nullopt)
                 this->mount_student();
 
@@ -86,8 +89,6 @@ namespace isolate
 
     void Isolated::pivot_root()
     {
-        if (mount(folder_.c_str(), folder_.c_str(), NULL, MS_BIND, NULL) == -1)
-            throw IsolatedException("could not mount bind");
 
         if (chdir(folder_.c_str()) == -1)
             throw IsolatedException("could not chdir");
